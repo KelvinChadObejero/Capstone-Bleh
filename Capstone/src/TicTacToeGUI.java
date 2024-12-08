@@ -4,6 +4,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class TicTacToeGUI extends JFrame implements ActionListener {
     // xScore - holds the score value for the x player
@@ -18,6 +24,9 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
     private JButton[][] board;
     private JDialog resultDialog;
 
+    private static final String HIGH_SCORE_DIR = "High Score";
+    private static final String SCORE_FILE = HIGH_SCORE_DIR + File.separator + "scores.txt";
+
     public TicTacToeGUI() {
         super("TicTacToe");
         setSize(CommonConstants.FRAME_SIZE);
@@ -27,6 +36,9 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
         setLayout(null);
         getContentPane().setBackground(CommonConstants.BACKGROUND_COLOR);
 
+        new File(HIGH_SCORE_DIR).mkdirs();
+
+        loadScores();
         // init vars
         createResultDialog();
         board = new JButton[3][3];
@@ -345,4 +357,31 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
             }
         }
     }
+
+    private void saveScores() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(SCORE_FILE))) {
+            writer.write("X: " + xScore + "\n");
+            writer.write("O: " + oScore + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadScores() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(SCORE_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("X: ")) {
+                    xScore = Integer.parseInt(line.substring(3));
+                } else if (line.startsWith("O: ")) {
+                    oScore = Integer.parseInt(line.substring(3));
+                }
+            }
+        } catch (IOException e) {
+            // If the file doesn't exist or can't be read, initialize scores to 0
+            xScore = 0;
+            oScore = 0;
+        }
+    }
 }
+
