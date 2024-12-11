@@ -16,16 +16,16 @@ public class MainMenu extends JFrame {
         setTitle("Main Menu");
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setContentPane(menuPanel); // Attach the GUI form panel to the frame
+        setContentPane(menuPanel); 
         setLocationRelativeTo(null);
 
-        // Add action listener for STARTGAMEButton
+       
         STARTGAMEButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Open TicTacToeGUI when button is clicked
+                
                 new TicTacToeGUI().setVisible(true);
-                dispose(); // Optional: Close the main menu window
+                dispose(); 
             }
         });
     }
