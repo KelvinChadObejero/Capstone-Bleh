@@ -12,12 +12,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class TicTacToeGUI extends JFrame implements ActionListener {
-    // xScore - holds the score value for the x player
-    // oScore - holds the score value for the o player
-    // moveCounter - counts the number of moves (used to determine if there is a draw)
+    
     private int xScore, oScore, moveCounter;
 
-    // isPlayerOne - flag to indicate if the current player is player x or not
+   
     private boolean isPlayerOne;
 
     private JLabel turnLabel, scoreLabel, resultLabel;
@@ -39,24 +37,24 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
         new File(HIGH_SCORE_DIR).mkdirs();
 
         loadScores();
-        // init vars
+        
         createResultDialog();
         board = new JButton[3][3];
 
-        // player x starts first
+        
         isPlayerOne = true;
 
         addGuiComponent();
     }
 
     private void addGuiComponent() {
-        // bar label
+       
         JLabel barLabel = new JLabel();
         barLabel.setOpaque(true);
         barLabel.setBackground(CommonConstants.BAR_COLOR);
         barLabel.setBounds(0, 0, CommonConstants.FRAME_SIZE.width, 25);
 
-        // turn label
+       
         turnLabel = new JLabel(CommonConstants.X_LABEL);
         turnLabel.setHorizontalAlignment(SwingConstants.CENTER);
         turnLabel.setFont(new Font("Dialog", Font.PLAIN, 40));
@@ -71,7 +69,7 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
                 turnLabel.getPreferredSize().height
         );
 
-        // score label
+      
         scoreLabel = new JLabel(CommonConstants.SCORE_LABEL);
         scoreLabel.setFont(new Font("Dialog", Font.PLAIN, 40));
         scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -82,7 +80,7 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
                 scoreLabel.getPreferredSize().height
         );
 
-        // game board
+       
         GridLayout gridLayout = new GridLayout(3, 3);
         JPanel boardPanel = new JPanel(gridLayout);
         boardPanel.setBounds(0,
@@ -91,7 +89,7 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
                 CommonConstants.BOARD_SIZE.height
         );
 
-        // create board
+       
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 JButton button = new JButton();
@@ -109,7 +107,7 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
 
         }
 
-        // reset button
+        
         JButton resetButton = new JButton("Reset");
         resetButton.setFont(new Font("Dialog", Font.PLAIN, 24));
         resetButton.addActionListener(this);
@@ -145,13 +143,13 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
             }
         });
 
-        // result label
+       
         resultLabel = new JLabel();
         resultLabel.setFont(new Font("Dialog", Font.BOLD, 18));
         resultLabel.setForeground(CommonConstants.BOARD_COLOR);
         resultLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-        // restart button
+        
         JButton restartButton = new JButton("Play Again");
         restartButton.setBackground(CommonConstants.BOARD_COLOR);
         restartButton.addActionListener(this);
@@ -165,10 +163,10 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String command = e.getActionCommand();
         if (command.equals("Reset") || command.equals("Play Again")) {
-            // reset the game
+            
             resetGame();
 
-            // only reset the score when pressing reset
+           
             if (command.equals("Reset"))
                 xScore = oScore = 0;
 
@@ -176,50 +174,50 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
                 resultDialog.setVisible(false);
 
         } else {
-            // player move
+            
             JButton button = (JButton) e.getSource();
             if (button.getText().equals("")) {
                 moveCounter++;
 
-                // mark the button with x/o only if it hasn't been selected yet
+               
                 if (isPlayerOne) {
-                    // player one (x player)
+                   
                     button.setText(CommonConstants.X_LABEL);
                     button.setForeground(CommonConstants.X_COLOR);
 
-                    // update turn label
+                   
                     turnLabel.setText(CommonConstants.O_LABEL);
                     turnLabel.setBackground(CommonConstants.O_COLOR);
 
-                    // update turn
+                   
                     isPlayerOne = false;
                 } else {
-                    // player two (o player)
+                  
                     button.setText(CommonConstants.O_LABEL);
                     button.setForeground(CommonConstants.O_COLOR);
 
-                    // update turn label
+                   
                     turnLabel.setText(CommonConstants.X_LABEL);
                     turnLabel.setBackground(CommonConstants.X_COLOR);
 
-                    // update turn
+                   
                     isPlayerOne = true;
                 }
 
-                // check win conditions
+               
                 if (isPlayerOne) {
-                    // check to see if the last move from O was the winning move
+                   
                     checkOWin();
                 }
                 {
-                    // check to see if the last move from X was the winning move
+                    
                     checkXWin();
                 }
 
-                // check for draw conditions
+               
                 checkDraw();
 
-                // update score label
+               
                 scoreLabel.setText("X: " + xScore + " | O: " + oScore);
             }
 
@@ -231,50 +229,50 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
     private void checkXWin() {
         String result = "X wins!";
 
-        // check rows
+        
         for (int row = 0; row < board.length; row++) {
             if (board[row][0].getText().equals("X") && board[row][1].getText().equals("X") && board[row][2].getText().equals("X")) {
                 resultLabel.setText(result);
 
-                // display result dialog
+               
                 resultDialog.setVisible(true);
 
-                // update score
+                
                 xScore++;
             }
         }
 
-        // check columns
+        
         for (int col = 0; col < board.length; col++) {
             if (board[0][col].getText().equals("X") && board[1][col].getText().equals("X") && board[2][col].getText().equals("X")) {
                 resultLabel.setText(result);
 
-                // display result dialog
+               
                 resultDialog.setVisible(true);
 
-                // update score
+               
                 xScore++;
             }
         }
 
-        // check diagonals
+       
         if (board[0][0].getText().equals("X") && board[1][1].getText().equals("X") && board[2][2].getText().equals("X")) {
             resultLabel.setText(result);
 
-            // display result dialog
+           
             resultDialog.setVisible(true);
 
-            // update score
+          
             xScore++;
         }
 
         if (board[2][0].getText().equals("X") && board[1][1].getText().equals("X") && board[0][2].getText().equals("X")) {
             resultLabel.setText(result);
 
-            // display result dialog
+            
             resultDialog.setVisible(true);
 
-            // update score
+           
             xScore++;
         }
     }
@@ -282,56 +280,56 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
     private void checkOWin() {
         String result = "O wins!";
 
-        // check rows
+        
         for (int row = 0; row < board.length; row++) {
             if (board[row][0].getText().equals("O") && board[row][1].getText().equals("O") && board[row][2].getText().equals("O")) {
                 resultLabel.setText(result);
 
-                // display result dialog
+               
                 resultDialog.setVisible(true);
 
-                // update score
+                
                 oScore++;
             }
         }
 
-        // check columns
+       
         for (int col = 0; col < board.length; col++) {
             if (board[0][col].getText().equals("O") && board[1][col].getText().equals("O") && board[2][col].getText().equals("O")) {
                 resultLabel.setText(result);
 
-                // display result dialog
+               
                 resultDialog.setVisible(true);
 
-                // update score
+                
                 oScore++;
             }
         }
 
-        // check diagonals
+       
         if (board[0][0].getText().equals("O") && board[1][1].getText().equals("O") && board[2][2].getText().equals("O")) {
             resultLabel.setText(result);
 
-            // display result dialog
+           
             resultDialog.setVisible(true);
 
-            // update score
+            
             oScore++;
         }
 
         if (board[2][0].getText().equals("O") && board[1][1].getText().equals("O") && board[0][2].getText().equals("O")) {
             resultLabel.setText(result);
 
-            // display result dialog
+           
             resultDialog.setVisible(true);
 
-            // update score
+           
             oScore++;
         }
     }
 
     private void checkDraw() {
-        // if there a total of 9 moves and no player has won yet then it means there is a draw
+       
         if (moveCounter >= 9) {
             resultLabel.setText("Draw!");
             resultDialog.setVisible(true);
@@ -339,18 +337,18 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
     }
 
     private void resetGame() {
-        // reset player back to x_player
+       
         isPlayerOne = true;
         turnLabel.setText(CommonConstants.X_LABEL);
         turnLabel.setBackground(CommonConstants.X_COLOR);
 
-        // reset score display
+       
         scoreLabel.setText(CommonConstants.SCORE_LABEL);
 
-        // rest move counter
+       
         moveCounter = 0;
 
-        // reset board
+        
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 board[i][j].setText("");
@@ -378,7 +376,7 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
                 }
             }
         } catch (IOException e) {
-            // If the file doesn't exist or can't be read, initialize scores to 0
+           
             xScore = 0;
             oScore = 0;
         }
