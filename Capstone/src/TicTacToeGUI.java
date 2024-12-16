@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Random;
 
 public class TicTacToeGUI extends JFrame implements ActionListener {
     private int xScore, oScore, moveCounter;
@@ -37,7 +38,6 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
         loadScores();
         createResultDialog();
         board = new JButton[3][3];
-        isPlayerOne = true;
 
         addGuiComponent();
     }
@@ -49,12 +49,12 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
         barLabel.setBounds(0, 0, CommonConstants.FRAME_SIZE.width, 25);
 
         // Display current player's name
-        turnLabel = new JLabel(player1Name + "'s Turn");
+        turnLabel = new JLabel(isPlayerOne ? player1Name + "'s Turn" : player2Name + "'s Turn");
         turnLabel.setHorizontalAlignment(SwingConstants.CENTER);
         turnLabel.setFont(new Font("Dialog", Font.PLAIN, 40));
         turnLabel.setPreferredSize(new Dimension(300, turnLabel.getPreferredSize().height));
         turnLabel.setOpaque(true);
-        turnLabel.setBackground(CommonConstants.X_COLOR);
+        turnLabel.setBackground(isPlayerOne ? CommonConstants.X_COLOR : CommonConstants.O_COLOR);
         turnLabel.setForeground(CommonConstants.BOARD_COLOR);
         turnLabel.setBounds(
                 (CommonConstants.FRAME_SIZE.width - turnLabel.getPreferredSize().width) / 2,
@@ -155,7 +155,7 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
             resetGame();
 
             if (command.equals("Reset")) {
-                xScore = oScore = 0; // Reset both scores to 0
+                xScore = oScore = 0;
             }
 
             if (command.equals("Play Again")) {
@@ -167,19 +167,19 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
                 moveCounter++;
 
                 if (isPlayerOne) {
-                    button.setText("X"); // Set button text to "X" for player 1
+                    button.setText("X");
                     button.setForeground(CommonConstants.X_COLOR);
-                    turnLabel.setText(player2Name + "'s turn"); // Update turn label to show player 2's name
+                    turnLabel.setText(player2Name + "'s turn");
                     isPlayerOne = false;
                 } else {
-                    button.setText("O"); // Set button text to "O" for player 2
+                    button.setText("O");
                     button.setForeground(CommonConstants.O_COLOR);
-                    turnLabel.setText(player1Name + "'s turn"); // Update turn label to show player 1's name
+                    turnLabel.setText(player1Name + "'s turn");
                     isPlayerOne = true;
                 }
 
                 checkWin();
-                checkDraw(); // Ensure this is called after checkWin
+                checkDraw();
                 scoreLabel.setText(player1Name + " - " + xScore + " | " + player2Name + " - " + oScore);
             }
 
@@ -194,17 +194,20 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
             resultLabel.setText(player1Name + " wins!");
             resultDialog.setVisible(true);
             xScore++;
+            saveScores(player1Name, player2Name, xScore, oScore);
         } else if (checkPlayerWin(player2Name, CommonConstants.O_COLOR)) {
             resultLabel.setText(player2Name + " wins!");
             resultDialog.setVisible(true);
             oScore++;
+            saveScores(player1Name, player2Name, xScore, oScore);
         }
     }
 
-    private boolean checkPlayerWin(String playerName, Color playerColor) {
-        String playerSymbol = playerName.equals(player1Name) ? "X" : "O"; // Use "X" and "O" for checking
 
-        // Check rows, columns, and diagonals for a win
+    private boolean checkPlayerWin(String playerName, Color playerColor) {
+        String playerSymbol = playerName.equals(player1Name) ? "X" : "O";
+
+
         for (int row = 0; row < board.length; row++) {
             if (board[row][0].getText().equals(playerSymbol) && board[row][1].getText().equals(playerSymbol) && board[row][2].getText().equals(playerSymbol)) {
                 return true;
@@ -232,12 +235,14 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
         if (moveCounter >= 9) {
             resultLabel.setText("Draw!");
             resultDialog.setVisible(true);
+            saveScores(player1Name, player2Name, xScore, oScore);
         }
     }
 
     private void resetGame() {
-        isPlayerOne = true;
-        turnLabel.setText(player1Name + "'s turn");
+        isPlayerOne = new Random().nextBoolean();
+        turnLabel.setText(isPlayerOne ? player1Name + "'s turn" : player2Name + "'s turn");
+        turnLabel.setBackground(isPlayerOne ? CommonConstants.X_COLOR : CommonConstants.O_COLOR);
         scoreLabel.setText(player1Name + " - " + xScore + " | " + player2Name + " - " + oScore);
         moveCounter = 0;
 
@@ -248,12 +253,25 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
         }
     }
 
-    private void saveScores() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(SCORE_FILE))) {
-            writer.write("X: " + xScore + "\n");
-            writer.write("O: " + oScore + "\n");
+    private void saveScores(String player1Name, String player2Name, int xScore, int oScore) {
+        // Create the file directory if it does not exis
+        File file = new File(HIGH_SCORE_DIR);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(SCORE_FILE, true))) {
+            writer.write(player1Name + " vs " + player2Name + ": ");
+            if (xScore > oScore) {
+                writer.write(player1Name + " wins");
+            } else if (oScore > xScore) {
+                writer.write(player2Name + " wins");
+            } else {
+                writer.write("Draw");
+            }
+            writer.newLine();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error saving scores: " + e.getMessage());
         }
     }
 
@@ -261,15 +279,10 @@ public class TicTacToeGUI extends JFrame implements ActionListener {
         try (BufferedReader reader = new BufferedReader(new FileReader(SCORE_FILE))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.startsWith("X: ")) {
-                    xScore = Integer.parseInt(line.substring(3));
-                } else if (line.startsWith("O: ")) {
-                    oScore = Integer.parseInt(line.substring(3));
-                }
+                System.out.println(line);
             }
         } catch (IOException e) {
-            xScore = 0;
-            oScore = 0;
+            System.err.println("Error loading scores: " + e.getMessage());
         }
     }
 }
